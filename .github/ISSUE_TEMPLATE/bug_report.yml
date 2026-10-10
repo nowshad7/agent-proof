@@ -1,0 +1,45 @@
+name: Bug report
+description: Something did not behave as documented.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: >-
+        Thanks for filing a bug. Please include enough detail to reproduce it.
+        Do not paste secrets — sanitize any evidence first.
+  - type: input
+    id: version
+    attributes:
+      label: AgentProof version
+      description: Output of `agentproof version`.
+      placeholder: agentproof 0.1.0-dev
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: Ubuntu 24.04 / macOS 15 / Windows 11
+    validations:
+      required: true
+  - type: textarea
+    id: contract
+    attributes:
+      label: Minimal contract
+      description: The smallest `agent-proof.json` that reproduces the problem.
+      render: json
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened
+      description: Include the CLI output and, if relevant, sanitized receipt content.
+    validations:
+      required: true

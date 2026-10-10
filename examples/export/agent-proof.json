@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "id": "unit",
+      "command": ["go", "test", "-json", "./..."],
+      "parser": "go",
+      "timeout_seconds": 120
+    }
+  ],
+  "requirements": [
+    {
+      "id": "unicode-export",
+      "description": "CSV exports preserve Unicode text",
+      "check": "unit",
+      "test": "example.com/export::TestUnicode"
+    },
+    {
+      "id": "csv-quoting",
+      "description": "Fields containing separators are quoted",
+      "check": "unit",
+      "test": "example.com/export::TestQuoting"
+    }
+  ]
+}

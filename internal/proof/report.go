@@ -1,0 +1,176 @@
+package proof
+
+import (
+	"encoding/json"
+	"fmt"
+	"html"
+	"strings"
+)
+
+// RenderJSON returns the receipt as indented JSON.
+func RenderJSON(r *Receipt) ([]byte, error) {
+	out, err := json.MarshalIndent(r, "", "  ")
+	if err != nil {
+		return nil, err
+	}
+	return append(out, '\n'), nil
+}
+
+// RenderMarkdown returns a compact requirement-oriented summary.
+func RenderMarkdown(r *Receipt) []byte {
+	var b strings.Builder
+	fmt.Fprintf(&b, "# AgentProof receipt\n\n")
+	fmt.Fprintf(&b, "- **Status:** %s\n", r.Status)
+	fmt.Fprintf(&b, "- **Commit:** `%s`\n", r.Commit)
+	fmt.Fprintf(&b, "- **Config:** `%s`\n", r.ConfigHash)
+	fmt.Fprintf(&b, "- **Started:** %s\n", r.StartedAt)
+	if r.Runner != "" {
+		fmt.Fprintf(&b, "- **Runner:** %s\n", r.Runner)
+	}
+	fmt.Fprintf(&b, "- **AgentProof:** %s\n\n", r.AgentProofVersion)
+
+	b.WriteString("## Requirements\n\n")
+	b.WriteString("| Requirement | State | Check | Detail |\n")
+	b.WriteString("| --- | --- | --- | --- |\n")
+	for _, rr := range r.Requirements {
+		detail := rr.Detail
+		if detail == "" {
+			detail = "—"
+		}
+		fmt.Fprintf(&b, "| %s | %s | %s | %s |\n",
+			mdEscape(rr.ID), rr.State, mdEscape(rr.Check), mdEscape(detail))
+	}
+
+	b.WriteString("\n## Checks\n\n")
+	b.WriteString("| Check | Parser | Status | Exit | Duration (ms) |\n")
+	b.WriteString("| --- | --- | --- | --- | --- |\n")
+	for _, cr := range r.Checks {
+		fmt.Fprintf(&b, "| %s | %s | %s | %d | %d |\n",
+			mdEscape(cr.ID), cr.Parser, cr.Status, cr.ExitCode, cr.DurationMS)
+	}
+
+	if len(r.Warnings) > 0 {
+		b.WriteString("\n## Trust and scope\n\n")
+		for _, w := range r.Warnings {
+			fmt.Fprintf(&b, "- %s\n", w)
+		}
+	}
+	return []byte(b.String())
+}
+
+func mdEscape(s string) string {
+	s = strings.ReplaceAll(s, "|", "\\|")
+	s = strings.ReplaceAll(s, "\n", " ")
+	return s
+}
+
+// RenderHTML returns a self-contained HTML report. All evidence is escaped and
+// a restrictive content-security policy is applied.
+func RenderHTML(r *Receipt) []byte {
+	var b strings.Builder
+	b.WriteString("<!doctype html>\n<html lang=\"en\">\n<head>\n")
+	b.WriteString("<meta charset=\"utf-8\">\n")
+	b.WriteString("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n")
+	b.WriteString("<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'\">\n")
+	fmt.Fprintf(&b, "<title>AgentProof receipt — %s</title>\n", html.EscapeString(r.Status))
+	b.WriteString("<style>\n")
+	b.WriteString(htmlStyle)
+	b.WriteString("\n</style>\n</head>\n<body>\n")
+
+	fmt.Fprintf(&b, "<header class=\"hero status-%s\">\n", strings.ToLower(html.EscapeString(r.Status)))
+	b.WriteString("<p class=\"brand\">AgentProof</p>\n")
+	fmt.Fprintf(&b, "<h1>%s</h1>\n", html.EscapeString(r.Status))
+	b.WriteString("<dl class=\"meta\">\n")
+	htmlMeta(&b, "Commit", r.Commit)
+	htmlMeta(&b, "Config", r.ConfigHash)
+	htmlMeta(&b, "Started", r.StartedAt)
+	if r.Runner != "" {
+		htmlMeta(&b, "Runner", r.Runner)
+	}
+	htmlMeta(&b, "AgentProof", r.AgentProofVersion)
+	b.WriteString("</dl>\n</header>\n")
+
+	b.WriteString("<main>\n<section>\n<h2>Requirements</h2>\n<table>\n")
+	b.WriteString("<thead><tr><th>Requirement</th><th>State</th><th>Check</th><th>Detail</th></tr></thead>\n<tbody>\n")
+	for _, rr := range r.Requirements {
+		fmt.Fprintf(&b, "<tr><td>%s<br><span class=\"muted\">%s</span></td><td><span class=\"badge b-%s\">%s</span></td><td><code>%s</code></td><td>%s</td></tr>\n",
+			html.EscapeString(rr.ID), html.EscapeString(rr.Description),
+			strings.ToLower(rr.State), html.EscapeString(rr.State),
+			html.EscapeString(rr.Check), html.EscapeString(rr.Detail))
+	}
+	b.WriteString("</tbody>\n</table>\n</section>\n")
+
+	b.WriteString("<section>\n<h2>Checks</h2>\n")
+	for _, cr := range r.Checks {
+		fmt.Fprintf(&b, "<details>\n<summary><span class=\"badge b-%s\">%s</span> <code>%s</code> <span class=\"muted\">exit %d · %d ms</span></summary>\n",
+			strings.ToLower(cr.Status), html.EscapeString(cr.Status),
+			html.EscapeString(cr.ID), cr.ExitCode, cr.DurationMS)
+		fmt.Fprintf(&b, "<p class=\"cmd\"><code>%s</code></p>\n", html.EscapeString(strings.Join(cr.Command, " ")))
+		if cr.Diagnostic != "" {
+			fmt.Fprintf(&b, "<p class=\"diag\">%s</p>\n", html.EscapeString(cr.Diagnostic))
+		}
+		if len(cr.Tests) > 0 {
+			b.WriteString("<table class=\"tests\">\n<thead><tr><th>Test</th><th>Status</th></tr></thead>\n<tbody>\n")
+			for _, t := range cr.Tests {
+				fmt.Fprintf(&b, "<tr><td><code>%s</code></td><td><span class=\"badge b-%s\">%s</span></td></tr>\n",
+					html.EscapeString(t.Name), html.EscapeString(t.Status), html.EscapeString(t.Status))
+			}
+			b.WriteString("</tbody>\n</table>\n")
+		}
+		if strings.TrimSpace(cr.Stderr) != "" {
+			fmt.Fprintf(&b, "<pre>%s</pre>\n", html.EscapeString(truncate(cr.Stderr, 4000)))
+		}
+		b.WriteString("</details>\n")
+	}
+	b.WriteString("</section>\n")
+
+	if len(r.Warnings) > 0 {
+		b.WriteString("<section class=\"warnings\">\n<h2>Trust and scope</h2>\n<ul>\n")
+		for _, w := range r.Warnings {
+			fmt.Fprintf(&b, "<li>%s</li>\n", html.EscapeString(w))
+		}
+		b.WriteString("</ul>\n</section>\n")
+	}
+
+	b.WriteString("</main>\n<footer><p>Unsigned receipt. It proves only the declared checks.</p></footer>\n</body>\n</html>\n")
+	return []byte(b.String())
+}
+
+func htmlMeta(b *strings.Builder, k, v string) {
+	fmt.Fprintf(b, "<div><dt>%s</dt><dd><code>%s</code></dd></div>\n", html.EscapeString(k), html.EscapeString(v))
+}
+
+func truncate(s string, n int) string {
+	if len(s) <= n {
+		return s
+	}
+	return s[:n] + "\n… (truncated)"
+}
+
+const htmlStyle = `:root{color-scheme:light dark;--bg:#0f1417;--panel:#171e23;--ink:#e6edf0;--muted:#8aa0ab;--line:#2a343b;--teal:#2dd4bf;--teal-ink:#0b1f1c}
+@media (prefers-color-scheme: light){:root{--bg:#f6f8f9;--panel:#ffffff;--ink:#16232a;--muted:#5b6b74;--line:#dce4e8;--teal:#0d9488;--teal-ink:#ecfeff}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;padding-bottom:3rem}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.86em}
+.hero{padding:2.2rem 1.25rem;border-bottom:1px solid var(--line);background:linear-gradient(180deg,var(--panel),transparent)}
+.brand{letter-spacing:.14em;text-transform:uppercase;font-size:.72rem;color:var(--teal);margin:0 0 .35rem;font-weight:700}
+.hero h1{margin:.1rem 0 1rem;font-size:2rem}
+.status-pass h1{color:var(--teal)}.status-fail h1,.status-error h1{color:#f87171}
+.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.5rem 1.5rem;margin:0}
+.meta dt{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}.meta dd{margin:.1rem 0 0}
+main{max-width:960px;margin:0 auto;padding:0 1.25rem}
+section{margin:2rem 0}h2{font-size:1.1rem;border-bottom:1px solid var(--line);padding-bottom:.4rem}
+table{width:100%;border-collapse:collapse;font-size:.92rem}
+th,td{text-align:left;padding:.55rem .6rem;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.muted{color:var(--muted);font-size:.85em}
+.badge{display:inline-block;padding:.08rem .5rem;border-radius:999px;font-size:.72rem;font-weight:700;letter-spacing:.03em;border:1px solid var(--line)}
+.b-pass,.b-PASS{background:rgba(45,212,191,.16);color:var(--teal);border-color:transparent}
+.b-fail,.b-FAIL,.b-error,.b-ERROR{background:rgba(248,113,113,.16);color:#f87171;border-color:transparent}
+.b-unverified,.b-UNVERIFIED,.b-skipped,.b-SKIPPED,.b-skip{background:rgba(251,191,36,.16);color:#f59e0b;border-color:transparent}
+details{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:.5rem .85rem;margin:.55rem 0}
+summary{cursor:pointer;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
+.cmd{color:var(--muted)}.diag{color:#f87171}
+pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:.75rem;overflow:auto;font-size:.82rem;font-family:ui-monospace,monospace}
+.tests{margin:.5rem 0}
+.warnings li{color:var(--muted)}
+footer{max-width:960px;margin:2rem auto 0;padding:1rem 1.25rem;border-top:1px solid var(--line);color:var(--muted);font-size:.85rem}`

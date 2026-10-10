@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Security report
+    url: https://github.com/nowshad7/agent-proof/security/advisories/new
+    about: Report a vulnerability privately. Do not open a public issue for security problems.
+  - name: Documentation
+    url: https://nowshad7.github.io/agent-proof/
+    about: Guides, reference and the security model.

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0c1113"/>
+      <stop offset="1" stop-color="#101a1d"/>
+    </linearGradient>
+    <linearGradient id="teal" x1="80" y1="0" x2="520" y2="0" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2dd4bf"/>
+      <stop offset="1" stop-color="#0d9488"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <g transform="translate(80 150)">
+    <rect x="0" y="0" width="92" height="92" rx="24" fill="#0f1417" stroke="#14b8a6" stroke-width="2" opacity="0.6"/>
+    <path d="M46 14l25 10.4v16.6c0 15.6-10.2 27-25 31.3C31.2 68 21 56.6 21 41V24.4L46 14z" fill="#0d9488" fill-opacity="0.2" stroke="#2dd4bf" stroke-width="3.5" stroke-linejoin="round"/>
+    <path d="M34 46l8 8 16-16" stroke="#2dd4bf" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="200" y="212" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="68" font-weight="800" fill="#e6edf0">AgentProof</text>
+  <text x="82" y="330" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="44" font-weight="700" fill="url(#teal)">Reproducible verification for agent-written changes.</text>
+  <text x="82" y="398" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="30" fill="#a9bbc4">Explicit acceptance contracts · Go &amp; JUnit evidence · portable receipts</text>
+  <g font-family="ui-monospace, Menlo, Consolas, monospace" font-size="26" fill="#7b909b">
+    <text x="82" y="498">$ agentproof verify --trust-local</text>
+  </g>
+  <text x="82" y="560" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="24" fill="#2dd4bf">nowshad7.github.io/agent-proof</text>
+</svg>

@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+<title>AgentProof receipt — PASS</title>
+<style>
+:root{color-scheme:light dark;--bg:#0f1417;--panel:#171e23;--ink:#e6edf0;--muted:#8aa0ab;--line:#2a343b;--teal:#2dd4bf;--teal-ink:#0b1f1c}
+@media (prefers-color-scheme: light){:root{--bg:#f6f8f9;--panel:#ffffff;--ink:#16232a;--muted:#5b6b74;--line:#dce4e8;--teal:#0d9488;--teal-ink:#ecfeff}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;padding-bottom:3rem}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.86em}
+.hero{padding:2.2rem 1.25rem;border-bottom:1px solid var(--line);background:linear-gradient(180deg,var(--panel),transparent)}
+.brand{letter-spacing:.14em;text-transform:uppercase;font-size:.72rem;color:var(--teal);margin:0 0 .35rem;font-weight:700}
+.hero h1{margin:.1rem 0 1rem;font-size:2rem}
+.status-pass h1{color:var(--teal)}.status-fail h1,.status-error h1{color:#f87171}
+.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.5rem 1.5rem;margin:0}
+.meta dt{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}.meta dd{margin:.1rem 0 0}
+main{max-width:960px;margin:0 auto;padding:0 1.25rem}
+section{margin:2rem 0}h2{font-size:1.1rem;border-bottom:1px solid var(--line);padding-bottom:.4rem}
+table{width:100%;border-collapse:collapse;font-size:.92rem}
+th,td{text-align:left;padding:.55rem .6rem;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.muted{color:var(--muted);font-size:.85em}
+.badge{display:inline-block;padding:.08rem .5rem;border-radius:999px;font-size:.72rem;font-weight:700;letter-spacing:.03em;border:1px solid var(--line)}
+.b-pass,.b-PASS{background:rgba(45,212,191,.16);color:var(--teal);border-color:transparent}
+.b-fail,.b-FAIL,.b-error,.b-ERROR{background:rgba(248,113,113,.16);color:#f87171;border-color:transparent}
+.b-unverified,.b-UNVERIFIED,.b-skipped,.b-SKIPPED,.b-skip{background:rgba(251,191,36,.16);color:#f59e0b;border-color:transparent}
+details{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:.5rem .85rem;margin:.55rem 0}
+summary{cursor:pointer;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
+.cmd{color:var(--muted)}.diag{color:#f87171}
+pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:.75rem;overflow:auto;font-size:.82rem;font-family:ui-monospace,monospace}
+.tests{margin:.5rem 0}
+.warnings li{color:var(--muted)}
+footer{max-width:960px;margin:2rem auto 0;padding:1rem 1.25rem;border-top:1px solid var(--line);color:var(--muted);font-size:.85rem}
+</style>
+</head>
+<body>
+<header class="hero status-pass">
+<p class="brand">AgentProof</p>
+<h1>PASS</h1>
+<dl class="meta">
+<div><dt>Commit</dt><dd><code>96e440c08f9390dcaff0bce7985d29ee6dde5f58</code></dd></div>
+<div><dt>Config</dt><dd><code>sha256:1e5302987f79c47e1da5c1d68ed58d05f6ac56db30dc8f3468c99e853fc2a7c4</code></dd></div>
+<div><dt>Started</dt><dd><code>2026-10-10T04:41:31Z</code></dd></div>
+<div><dt>Runner</dt><dd><code>examples/export</code></dd></div>
+<div><dt>AgentProof</dt><dd><code>0.1.0-dev</code></dd></div>
+</dl>
+</header>
+<main>
+<section>
+<h2>Requirements</h2>
+<table>
+<thead><tr><th>Requirement</th><th>State</th><th>Check</th><th>Detail</th></tr></thead>
+<tbody>
+<tr><td>unicode-export<br><span class="muted">CSV exports preserve Unicode text</span></td><td><span class="badge b-pass">PASS</span></td><td><code>unit</code></td><td></td></tr>
+<tr><td>csv-quoting<br><span class="muted">Fields containing separators are quoted</span></td><td><span class="badge b-pass">PASS</span></td><td><code>unit</code></td><td></td></tr>
+</tbody>
+</table>
+</section>
+<section>
+<h2>Checks</h2>
+<details>
+<summary><span class="badge b-pass">PASS</span> <code>unit</code> <span class="muted">exit 0 · 8547 ms</span></summary>
+<p class="cmd"><code>go test -json ./...</code></p>
+<table class="tests">
+<thead><tr><th>Test</th><th>Status</th></tr></thead>
+<tbody>
+<tr><td><code>example.com/export::TestQuoting</code></td><td><span class="badge b-pass">pass</span></td></tr>
+<tr><td><code>example.com/export::TestUnicode</code></td><td><span class="badge b-pass">pass</span></td></tr>
+</tbody>
+</table>
+</details>
+</section>
+<section class="warnings">
+<h2>Trust and scope</h2>
+<ul>
+<li>Trusted local execution is not a sandbox: checks run with the caller&#39;s privileges.</li>
+<li>This receipt is unsigned and editable; it is not an authenticated attestation.</li>
+<li>AgentProof verifies the declared evidence workflow, not the honesty or completeness of the tests.</li>
+</ul>
+</section>
+</main>
+<footer><p>Unsigned receipt. It proves only the declared checks.</p></footer>
+</body>
+</html>

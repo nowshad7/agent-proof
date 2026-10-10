@@ -1,0 +1,56 @@
+{
+  "receipt_version": 1,
+  "agentproof_version": "0.1.0-dev",
+  "commit": "96e440c08f9390dcaff0bce7985d29ee6dde5f58",
+  "config_hash": "sha256:1e5302987f79c47e1da5c1d68ed58d05f6ac56db30dc8f3468c99e853fc2a7c4",
+  "started_at": "2026-10-10T04:41:31Z",
+  "runner": "examples/export",
+  "status": "PASS",
+  "checks": [
+    {
+      "id": "unit",
+      "command": [
+        "go",
+        "test",
+        "-json",
+        "./..."
+      ],
+      "parser": "go",
+      "exit_code": 0,
+      "duration_ms": 8547,
+      "status": "PASS",
+      "tests": [
+        {
+          "name": "example.com/export::TestQuoting",
+          "status": "pass"
+        },
+        {
+          "name": "example.com/export::TestUnicode",
+          "status": "pass"
+        }
+      ],
+      "stdout": "{\"Time\":\"2026-10-10T04:41:39.759935317Z\",\"Action\":\"start\",\"Package\":\"example.com/export\"}\n{\"Time\":\"2026-10-10T04:41:39.762332711Z\",\"Action\":\"run\",\"Package\":\"example.com/export\",\"Test\":\"TestUnicode\"}\n{\"Time\":\"2026-10-10T04:41:39.762361513Z\",\"Action\":\"output\",\"Package\":\"example.com/export\",\"Test\":\"TestUnicode\",\"Output\":\"=== RUN   TestUnicode\\n\"}\n{\"Time\":\"2026-10-10T04:41:39.762485745Z\",\"Action\":\"output\",\"Package\":\"example.com/export\",\"Test\":\"TestUnicode\",\"Output\":\"--- PASS: TestUnicode (0.00s)\\n\"}\n{\"Time\":\"2026-10-10T04:41:39.76248962Z\",\"Action\":\"pass\",\"Package\":\"example.com/export\",\"Test\":\"TestUnicode\",\"Elapsed\":0}\n{\"Time\":\"2026-10-10T04:41:39.762504345Z\",\"Action\":\"run\",\"Package\":\"example.com/export\",\"Test\":\"TestQuoting\"}\n{\"Time\":\"2026-10-10T04:41:39.762506733Z\",\"Action\":\"output\",\"Package\":\"example.com/export\",\"Test\":\"TestQuoting\",\"Output\":\"=== RUN   TestQuoting\\n\"}\n{\"Time\":\"2026-10-10T04:41:39.762510159Z\",\"Action\":\"output\",\"Package\":\"example.com/export\",\"Test\":\"TestQuoting\",\"Output\":\"--- PASS: TestQuoting (0.00s)\\n\"}\n{\"Time\":\"2026-10-10T04:41:39.762512678Z\",\"Action\":\"pass\",\"Package\":\"example.com/export\",\"Test\":\"TestQuoting\",\"Elapsed\":0}\n{\"Time\":\"2026-10-10T04:41:39.762515169Z\",\"Action\":\"output\",\"Package\":\"example.com/export\",\"Output\":\"PASS\\n\"}\n{\"Time\":\"2026-10-10T04:41:39.762833898Z\",\"Action\":\"output\",\"Package\":\"example.com/export\",\"Output\":\"ok  \\texample.com/export\\t0.002s\\n\"}\n{\"Time\":\"2026-10-10T04:41:39.763345933Z\",\"Action\":\"pass\",\"Package\":\"example.com/export\",\"Elapsed\":0.003}\n"
+    }
+  ],
+  "requirements": [
+    {
+      "id": "unicode-export",
+      "description": "CSV exports preserve Unicode text",
+      "check": "unit",
+      "test": "example.com/export::TestUnicode",
+      "state": "PASS"
+    },
+    {
+      "id": "csv-quoting",
+      "description": "Fields containing separators are quoted",
+      "check": "unit",
+      "test": "example.com/export::TestQuoting",
+      "state": "PASS"
+    }
+  ],
+  "warnings": [
+    "Trusted local execution is not a sandbox: checks run with the caller's privileges.",
+    "This receipt is unsigned and editable; it is not an authenticated attestation.",
+    "AgentProof verifies the declared evidence workflow, not the honesty or completeness of the tests."
+  ]
+}

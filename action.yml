@@ -1,0 +1,92 @@
+name: AgentProof
+description: >-
+  Verify agent-written changes against an acceptance contract and produce a
+  portable receipt. Preview quality — validate from a sample repository first.
+author: nowshad7
+
+branding:
+  icon: shield
+  color: green
+
+inputs:
+  commit:
+    description: Revision to resolve and snapshot (default HEAD).
+    required: false
+    default: HEAD
+  repo:
+    description: Repository directory to verify.
+    required: false
+    default: "."
+  config:
+    description: >-
+      Optional path to a separately reviewed policy. Use this to apply a policy
+      from a protected base branch so a candidate change cannot weaken its own
+      gate. When empty, the committed agent-proof.json is used.
+    required: false
+    default: ""
+  out:
+    description: Directory for the receipt files.
+    required: false
+    default: ".agent-proof"
+  go-version:
+    description: Go version used to build the AgentProof CLI.
+    required: false
+    default: "1.23"
+  version:
+    description: >-
+      AgentProof git ref (tag, branch or SHA) to build the CLI from.
+    required: false
+    default: main
+
+outputs:
+  status:
+    description: Overall receipt status (PASS, FAIL, UNVERIFIED, ERROR, SKIPPED).
+    value: ${{ steps.verify.outputs.status }}
+  receipt:
+    description: Path to the generated receipt.json.
+    value: ${{ steps.verify.outputs.receipt }}
+
+runs:
+  using: composite
+  steps:
+    # SECURITY: this Action runs the target repository's checks with the
+    # privileges of the job it runs in. Do not use it under
+    # pull_request_target with privileged credentials or secrets. Prefer a
+    # disposable, unprivileged runner. See docs/guide/security.
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: ${{ inputs.go-version }}
+
+    - name: Build agentproof
+      shell: bash
+      run: |
+        set -euo pipefail
+        GOBIN="$RUNNER_TEMP/agentproof-bin" go install \
+          "github.com/nowshad7/agent-proof/cmd/agentproof@${{ inputs.version }}"
+        echo "$RUNNER_TEMP/agentproof-bin" >> "$GITHUB_PATH"
+
+    - name: Verify
+      id: verify
+      shell: bash
+      run: |
+        set -uo pipefail
+        args=(verify --trust-local --repo "${{ inputs.repo }}" \
+          --commit "${{ inputs.commit }}" --out "${{ inputs.out }}" \
+          --runner "github-actions/${{ github.sha }}")
+        if [ -n "${{ inputs.config }}" ]; then
+          args+=(--config "${{ inputs.config }}")
+        fi
+
+        agentproof "${args[@]}"
+        code=$?
+
+        receipt="${{ inputs.out }}/receipt.json"
+        status="ERROR"
+        if [ -f "$receipt" ]; then
+          status="$(grep -o '"status": *"[A-Z]*"' "$receipt" | head -n1 | grep -o '[A-Z]*$' || echo ERROR)"
+        fi
+        echo "status=$status" >> "$GITHUB_OUTPUT"
+        echo "receipt=$receipt" >> "$GITHUB_OUTPUT"
+
+        exit $code

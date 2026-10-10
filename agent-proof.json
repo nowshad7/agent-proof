@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "id": "unit",
+      "command": ["go", "test", "-json", "./..."],
+      "parser": "go",
+      "timeout_seconds": 600
+    }
+  ],
+  "requirements": [
+    {
+      "id": "snapshot-metadata",
+      "description": "The snapshot extractor accepts git's PAX global header and still rejects unsafe entries",
+      "check": "unit",
+      "test": "github.com/nowshad7/agent-proof/internal/proof::TestVerifySnapshot"
+    },
+    {
+      "id": "fail-closed-unverified",
+      "description": "A missing named test is reported as UNVERIFIED and fails the gate",
+      "check": "unit",
+      "test": "github.com/nowshad7/agent-proof/internal/proof::TestVerifyFailClosedUnverified"
+    },
+    {
+      "id": "stale-report-removed",
+      "description": "A stale tracked JUnit report cannot pass once removed before the check",
+      "check": "unit",
+      "test": "github.com/nowshad7/agent-proof/internal/proof::TestVerifyStaleReportRemoved"
+    },
+    {
+      "id": "html-escaping",
+      "description": "Evidence is escaped in the HTML receipt",
+      "check": "unit",
+      "test": "github.com/nowshad7/agent-proof/internal/proof::TestRenderHTMLEscapes"
+    }
+  ]
+}

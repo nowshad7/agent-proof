@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "id": "unit",
+      "command": ["python3", "junit_runner.py"],
+      "parser": "junit",
+      "timeout_seconds": 120,
+      "report_path": "report.xml"
+    }
+  ],
+  "requirements": [
+    {
+      "id": "unicode-slug",
+      "description": "Slugs transliterate Unicode to ASCII",
+      "check": "unit",
+      "test": "test_slugify.SlugifyTests::test_unicode"
+    },
+    {
+      "id": "separator-collapse",
+      "description": "Repeated separators collapse to one hyphen",
+      "check": "unit",
+      "test": "test_slugify.SlugifyTests::test_collapses_separators"
+    }
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://nowshad7.github.io/agent-proof/schemas/receipt.schema.json",
+  "title": "AgentProof receipt",
+  "description": "Portable verification record. Unsigned; proves only the declared checks.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "receipt_version",
+    "agentproof_version",
+    "commit",
+    "config_hash",
+    "started_at",
+    "status",
+    "checks",
+    "requirements",
+    "warnings"
+  ],
+  "properties": {
+    "receipt_version": { "const": 1 },
+    "agentproof_version": { "type": "string" },
+    "commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$",
+      "description": "Resolved full commit SHA that was executed."
+    },
+    "config_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "description": "SHA-256 of the exact policy bytes."
+    },
+    "started_at": { "type": "string", "format": "date-time" },
+    "runner": { "type": "string" },
+    "status": { "$ref": "#/definitions/status" },
+    "checks": { "type": "array", "items": { "$ref": "#/definitions/check" } },
+    "requirements": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/requirement" }
+    },
+    "warnings": { "type": "array", "items": { "type": "string" } }
+  },
+  "definitions": {
+    "status": {
+      "enum": ["PASS", "FAIL", "UNVERIFIED", "ERROR", "SKIPPED"]
+    },
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "command", "parser", "exit_code", "duration_ms", "status"],
+      "properties": {
+        "id": { "type": "string" },
+        "command": { "type": "array", "items": { "type": "string" } },
+        "parser": { "enum": ["command", "go", "junit"] },
+        "exit_code": { "type": "integer" },
+        "duration_ms": { "type": "integer" },
+        "status": { "$ref": "#/definitions/status" },
+        "tests": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "status"],
+            "properties": {
+              "name": { "type": "string" },
+              "status": { "enum": ["pass", "fail", "skip"] }
+            }
+          }
+        },
+        "stdout": { "type": "string" },
+        "stderr": { "type": "string" },
+        "diagnostic": { "type": "string" }
+      }
+    },
+    "requirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "check", "state"],
+      "properties": {
+        "id": { "type": "string" },
+        "description": { "type": "string" },
+        "check": { "type": "string" },
+        "test": { "type": "string" },
+        "state": { "$ref": "#/definitions/status" },
+        "detail": { "type": "string" }
+      }
+    }
+  }
+}

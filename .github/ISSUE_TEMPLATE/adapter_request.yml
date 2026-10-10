@@ -1,0 +1,30 @@
+name: Adapter request
+description: Request support for another test framework's output.
+labels: [adapter, enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: >-
+        An adapter is supported only once its real emitted output is covered by
+        fixtures. Please attach a genuine report, not a hand-written example.
+  - type: input
+    id: framework
+    attributes:
+      label: Framework / tool
+      placeholder: pytest, Jest, Maven Surefire, ...
+    validations:
+      required: true
+  - type: textarea
+    id: fixture
+    attributes:
+      label: Real report fixture
+      description: A real, sanitized report emitted by the tool (JUnit XML or other).
+    validations:
+      required: true
+  - type: textarea
+    id: identities
+    attributes:
+      label: Expected test identities
+      description: The exact identities AgentProof should produce from that report.
+    validations:
+      required: true

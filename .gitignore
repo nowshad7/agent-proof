@@ -1,0 +1,19 @@
+# Build output
+/agentproof
+*.exe
+
+# AgentProof receipts (generated)
+/.agent-proof/
+
+# Go
+*.test
+*.out
+
+# Node / VitePress
+node_modules/
+docs/.vitepress/dist/
+docs/.vitepress/cache/
+
+# Editor / OS
+.DS_Store
+*.swp

@@ -1,0 +1,94 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://nowshad7.github.io/agent-proof/schemas/contract.schema.json",
+  "title": "AgentProof contract",
+  "description": "Acceptance contract (agent-proof.json) mapping requirements to executable evidence.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "checks", "requirements"],
+  "properties": {
+    "version": {
+      "const": 1,
+      "description": "Contract schema version. Only version 1 is supported."
+    },
+    "checks": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/definitions/check" }
+    },
+    "requirements": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/definitions/requirement" }
+    }
+  },
+  "definitions": {
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "command", "parser", "timeout_seconds"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Unique check identifier."
+        },
+        "command": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 },
+          "description": "Argument array executed directly (no shell interpolation)."
+        },
+        "parser": {
+          "enum": ["command", "go", "junit"],
+          "description": "How the check's output is interpreted."
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3600
+        },
+        "report_path": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Safe, relative path to a JUnit XML report. Required for the junit parser; forbidden otherwise."
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "parser": { "const": "junit" } } },
+          "then": { "required": ["report_path"] },
+          "else": {
+            "not": { "required": ["report_path"] }
+          }
+        }
+      ]
+    },
+    "requirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "check"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Unique requirement identifier."
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable acceptance statement."
+        },
+        "check": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The id of an existing check."
+        },
+        "test": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Exact test identity (package/import::TestName for Go, classname::name for JUnit)."
+        }
+      }
+    }
+  }
+}
