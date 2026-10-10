@@ -19,7 +19,7 @@ const usage = `agentproof — reproducible verification for agent-written change
 Usage:
   agentproof version
   agentproof verify [flags]
-  agentproof report --input <receipt.json> [--format json|md|html]
+  agentproof report --input <receipt.json> [--format json|md|html|gh]
 
 verify flags:
   --trust-local        Required. Acknowledge that checks run locally with your
@@ -145,7 +145,7 @@ func runReport(args []string) int {
 	fs := flag.NewFlagSet("report", flag.ContinueOnError)
 	fs.SetOutput(os.Stderr)
 	input := fs.String("input", "", "receipt.json path")
-	format := fs.String("format", "md", "json|md|html")
+	format := fs.String("format", "md", "json|md|html|gh")
 	if err := fs.Parse(args); err != nil {
 		return 2
 	}
@@ -175,6 +175,8 @@ func runReport(args []string) int {
 		os.Stdout.Write(proof.RenderMarkdown(receipt))
 	case "html":
 		os.Stdout.Write(proof.RenderHTML(receipt))
+	case "gh", "comment":
+		os.Stdout.Write(proof.RenderGitHubComment(receipt))
 	default:
 		fmt.Fprintf(os.Stderr, "error: unknown format %q\n", *format)
 		return 2

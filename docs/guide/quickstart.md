@@ -11,7 +11,19 @@ This runs your first verification in a few minutes against a sample project.
 
 ## 1. Install the CLI
 
-From source, into your `GOBIN`:
+**Prebuilt binary** (no Go toolchain needed) — download the archive for your
+platform from the [latest release](https://github.com/nowshad7/agent-proof/releases),
+verify it against `checksums.txt`, extract, and put `agentproof` on your `PATH`:
+
+```sh
+# Example for Linux x86-64; adjust the version and platform.
+VER=0.1.0
+curl -fsSLO "https://github.com/nowshad7/agent-proof/releases/download/v${VER}/agentproof_${VER}_linux_amd64.tar.gz"
+tar -xzf "agentproof_${VER}_linux_amd64.tar.gz"
+./agentproof version
+```
+
+**With Go**, into your `GOBIN`:
 
 ```sh
 go install github.com/nowshad7/agent-proof/cmd/agentproof@latest

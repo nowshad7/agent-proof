@@ -11,7 +11,7 @@ import (
 )
 
 // Version is the AgentProof build version. It is overridden at release time.
-var Version = "0.1.0-dev"
+var Version = "0.1.0"
 
 // Options configures a verification run.
 type Options struct {

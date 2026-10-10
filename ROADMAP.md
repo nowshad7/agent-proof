@@ -16,14 +16,17 @@ upon. There are no committed delivery dates.
 - Runnable Go and JUnit examples.
 - Contract and receipt JSON Schemas.
 - Documentation site.
+- A composite GitHub Action that posts the receipt as a sticky pull-request
+  comment (updated in place, including on failure), self-tested in CI.
+- Cross-platform release binaries and `checksums.txt` via GoReleaser, with a
+  tag-triggered release workflow and prebuilt-binary install path in the Action.
 
 ## P1 — after the core is dependable
 
-- Validate the reusable GitHub Action from a separate sample repository, with
-  explicit trust boundaries and reviewed policy inputs.
-- Platform release binaries, checksums and installation instructions.
+- Validate the GitHub Action from a separate downstream repository (the in-repo
+  self-test covers the wiring today).
 - Schema compatibility tests across contract/receipt versions.
-- Better diagnostic codes and a report-only CI mode.
+- Better diagnostic codes and a non-blocking report-only CI mode.
 - More framework fixtures based on real emitted JUnit reports.
 - Published sample receipts generated from the bundled examples.
 - Protected-base policy examples and acceptance-test guidance.

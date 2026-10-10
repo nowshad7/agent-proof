@@ -1,0 +1,53 @@
+# GoReleaser configuration for AgentProof.
+# Validated in CI with `goreleaser check`; runs on tag push via the release
+# workflow. See https://goreleaser.com.
+version: 2
+
+project_name: agentproof
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: agentproof
+    main: ./cmd/agentproof
+    binary: agentproof
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w -X github.com/nowshad7/agent-proof/internal/proof.Version={{ .Version }}
+
+archives:
+  - id: agentproof
+    # Produces e.g. agentproof_0.1.0_linux_amd64.tar.gz — the name the
+    # GitHub Action downloads.
+    name_template: "agentproof_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    formats:
+      - tar.gz
+    format_overrides:
+      - goos: windows
+        formats:
+          - zip
+    files:
+      - README.md
+      - LICENSE
+      - CHANGELOG.md
+
+checksum:
+  name_template: checksums.txt
+  algorithm: sha256
+
+changelog:
+  use: github
+  sort: asc
+
+release:
+  prerelease: auto
