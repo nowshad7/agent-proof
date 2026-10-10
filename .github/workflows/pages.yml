@@ -2,7 +2,7 @@ name: Deploy docs
 
 on:
   push:
-    branches: [main]
+    branches: [main, claude/practical-heisenberg-t9128a]
   workflow_dispatch:
 
 # Only the deployment job holds Pages privileges; it is separate from CI.
@@ -36,6 +36,10 @@ jobs:
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
+        with:
+          # Enable Pages (with GitHub Actions as the source) on first run,
+          # so no manual Settings change is required beforehand.
+          enablement: true
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
