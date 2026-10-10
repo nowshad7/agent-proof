@@ -23,7 +23,7 @@ reaches a stable release.
 - CI validates the GoReleaser config (`goreleaser check`) and exercises the
   Action end to end against this repository on pull requests.
 
-## [0.1.0] — 2026-10-10 (developer preview)
+## [0.1.0] — Developer preview
 
 The first public developer preview.
 
