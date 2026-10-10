@@ -122,7 +122,8 @@ runs:
         receipt="${{ inputs.out }}/receipt.json"
         status="ERROR"
         if [ -f "$receipt" ]; then
-          status="$(grep -o '"status": *"[A-Z]*"' "$receipt" | head -n1 | grep -o '[A-Z]*$' || echo ERROR)"
+          parsed="$(grep -o '"status": *"[A-Z]*"' "$receipt" | head -n1 | grep -oE '[A-Z]+' | head -n1)"
+          [ -n "$parsed" ] && status="$parsed"
         fi
         {
           echo "status=$status"
