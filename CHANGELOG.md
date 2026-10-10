@@ -7,7 +7,7 @@ reaches a stable release.
 
 ## [Unreleased]
 
-## [0.1.0] — Developer preview
+## [0.1.0] — 2026-10-10 (developer preview)
 
 The first public developer preview.
 
