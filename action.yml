@@ -1,7 +1,7 @@
 name: AgentProof
 description: >-
-  Verify agent-written changes against an acceptance contract and produce a
-  portable receipt. Preview quality — validate from a sample repository first.
+  Verify agent-written changes against an acceptance contract and post a
+  portable receipt to the pull request. Preview quality.
 author: nowshad7
 
 branding:
@@ -28,15 +28,22 @@ inputs:
     description: Directory for the receipt files.
     required: false
     default: ".agent-proof"
-  go-version:
-    description: Go version used to build the AgentProof CLI.
-    required: false
-    default: "1.23"
   version:
     description: >-
-      AgentProof git ref (tag, branch or SHA) to build the CLI from.
+      AgentProof version to use. A release tag (for example v0.1.0) downloads a
+      prebuilt binary; a branch or SHA builds from source.
     required: false
     default: main
+  go-version:
+    description: Go version used when building from source (fallback path).
+    required: false
+    default: "1.23"
+  comment-on-pr:
+    description: >-
+      On pull_request events, post (and keep updated) a single receipt comment.
+      Requires the calling job to grant pull-requests: write.
+    required: false
+    default: "true"
 
 outputs:
   status:
@@ -58,13 +65,40 @@ runs:
       with:
         go-version: ${{ inputs.go-version }}
 
-    - name: Build agentproof
+    - name: Install agentproof
       shell: bash
+      env:
+        VERSION: ${{ inputs.version }}
       run: |
-        set -euo pipefail
-        GOBIN="$RUNNER_TEMP/agentproof-bin" go install \
-          "github.com/nowshad7/agent-proof/cmd/agentproof@${{ inputs.version }}"
-        echo "$RUNNER_TEMP/agentproof-bin" >> "$GITHUB_PATH"
+        set -uo pipefail
+        bindir="$RUNNER_TEMP/agentproof-bin"
+        mkdir -p "$bindir"
+
+        os=linux; arch=amd64
+        case "${RUNNER_OS:-Linux}" in
+          Linux) os=linux ;; macOS) os=darwin ;; Windows) os=windows ;;
+        esac
+        case "${RUNNER_ARCH:-X64}" in
+          X64) arch=amd64 ;; ARM64) arch=arm64 ;;
+        esac
+
+        # A release tag downloads a prebuilt binary; anything else builds.
+        if [[ "$VERSION" =~ ^v[0-9] ]]; then
+          ver="${VERSION#v}"
+          url="https://github.com/nowshad7/agent-proof/releases/download/${VERSION}/agentproof_${ver}_${os}_${arch}.tar.gz"
+          echo "Trying prebuilt binary: $url"
+          if curl -fsSL "$url" -o "$RUNNER_TEMP/ap.tgz"; then
+            tar -xzf "$RUNNER_TEMP/ap.tgz" -C "$bindir"
+            echo "$bindir" >> "$GITHUB_PATH"
+            echo "Installed prebuilt agentproof $VERSION"
+            exit 0
+          fi
+          echo "No prebuilt binary for $VERSION; building from source."
+        fi
+
+        GOBIN="$bindir" go install "github.com/nowshad7/agent-proof/cmd/agentproof@${VERSION}"
+        echo "$bindir" >> "$GITHUB_PATH"
+        echo "Built agentproof from source ($VERSION)"
 
     - name: Verify
       id: verify
@@ -78,15 +112,65 @@ runs:
           args+=(--config "${{ inputs.config }}")
         fi
 
+        # Capture the gate result without aborting, so the receipt can still be
+        # posted to the PR on failure.
+        set +e
         agentproof "${args[@]}"
         code=$?
+        set -e
 
         receipt="${{ inputs.out }}/receipt.json"
         status="ERROR"
         if [ -f "$receipt" ]; then
           status="$(grep -o '"status": *"[A-Z]*"' "$receipt" | head -n1 | grep -o '[A-Z]*$' || echo ERROR)"
         fi
-        echo "status=$status" >> "$GITHUB_OUTPUT"
-        echo "receipt=$receipt" >> "$GITHUB_OUTPUT"
+        {
+          echo "status=$status"
+          echo "receipt=$receipt"
+          echo "exitcode=$code"
+        } >> "$GITHUB_OUTPUT"
 
-        exit $code
+    - name: Render PR comment body
+      if: ${{ always() && github.event_name == 'pull_request' && inputs.comment-on-pr == 'true' }}
+      shell: bash
+      run: |
+        set -uo pipefail
+        out="$RUNNER_TEMP/agentproof-comment.md"
+        receipt="${{ steps.verify.outputs.receipt }}"
+        if [ -f "$receipt" ]; then
+          agentproof report --input "$receipt" --format gh > "$out"
+        else
+          {
+            echo "<!-- agentproof-receipt -->"
+            echo "### ❌ AgentProof — ERROR"
+            echo
+            echo "Verification could not produce a receipt (configuration or execution error). Check the job logs."
+          } > "$out"
+        fi
+
+    - name: Upsert PR comment
+      if: ${{ always() && github.event_name == 'pull_request' && inputs.comment-on-pr == 'true' }}
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const path = process.env.RUNNER_TEMP + '/agentproof-comment.md';
+          if (!fs.existsSync(path)) return;
+          const body = fs.readFileSync(path, 'utf8');
+          const marker = '<!-- agentproof-receipt -->';
+          const { owner, repo } = context.repo;
+          const issue_number = context.payload.pull_request.number;
+          const comments = await github.paginate(github.rest.issues.listComments, {
+            owner, repo, issue_number, per_page: 100,
+          });
+          const existing = comments.find(c => c.body && c.body.includes(marker));
+          if (existing) {
+            await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+          } else {
+            await github.rest.issues.createComment({ owner, repo, issue_number, body });
+          }
+
+    - name: Gate
+      if: ${{ always() }}
+      shell: bash
+      run: exit ${{ steps.verify.outputs.exitcode }}

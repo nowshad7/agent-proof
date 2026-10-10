@@ -1,0 +1,37 @@
+name: Action self-test
+
+# Exercises the composite action end to end against this repository's own
+# contract, and posts the receipt comment, on pull requests from this repo.
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  selftest:
+    name: Run the action on this repo
+    runs-on: ubuntu-latest
+    # Fork PRs get a read-only token and cannot comment, so skip them.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run AgentProof against itself
+        id: ap
+        uses: ./
+        with:
+          # Build from the exact commit under test.
+          version: ${{ github.event.pull_request.head.sha || github.sha }}
+          comment-on-pr: 'true'
+
+      - name: Assert the gate passed
+        run: |
+          echo "status=${{ steps.ap.outputs.status }}"
+          test "${{ steps.ap.outputs.status }}" = "PASS"

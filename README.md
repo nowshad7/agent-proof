@@ -63,7 +63,7 @@ AgentProof FAIL
 ## Quickstart
 
 ```sh
-# 1. Install
+# 1. Install — a prebuilt binary from the releases page, or with Go:
 go install github.com/nowshad7/agent-proof/cmd/agentproof@latest
 
 # 2. Add agent-proof.json to your repo root and commit it (see below)
@@ -73,6 +73,28 @@ agentproof verify --trust-local
 
 # 4. Read the receipt
 agentproof report --input .agent-proof/receipt.json --format md
+```
+
+Prebuilt binaries (linux/macOS/windows, amd64/arm64) and checksums are attached
+to each [release](https://github.com/nowshad7/agent-proof/releases).
+
+### In CI
+
+The bundled [GitHub Action](https://nowshad7.github.io/agent-proof/guide/ci)
+runs the verification and posts the receipt as a single sticky pull-request
+comment — updated in place on every run, including on failure — so reviewers see
+exactly which requirement passed and which stayed unverified:
+
+```yaml
+permissions:
+  contents: read
+  pull-requests: write
+steps:
+  - uses: actions/checkout@v4
+    with: { fetch-depth: 0 }
+  - uses: nowshad7/agent-proof@v0.1.0
+    with:
+      version: v0.1.0
 ```
 
 A minimal contract:

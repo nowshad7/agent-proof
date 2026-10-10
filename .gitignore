@@ -5,6 +5,9 @@
 # AgentProof receipts (generated)
 /.agent-proof/
 
+# GoReleaser output
+/dist/
+
 # Go
 *.test
 *.out

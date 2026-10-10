@@ -66,9 +66,46 @@ base branch and apply it explicitly:
 The receipt records the SHA-256 of the exact policy bytes applied, so reviewers
 can confirm which policy ran.
 
-## About the bundled Action
+## The bundled Action
 
-A reusable GitHub Action (`action.yml`) ships in the repository, but it is
-early. Test it from a separate sample repository before relying on it, and read
-its inputs and trust notes first. Treat the Action as preview-quality until the
-[roadmap](/community/roadmap) marks it validated.
+A reusable GitHub Action (`action.yml`) runs the verification and, on pull
+requests, posts the receipt as a single sticky comment that it updates in place
+on every run — including when the gate fails, so reviewers always see why.
+
+```yaml
+name: acceptance
+on: [pull_request]
+
+permissions:
+  contents: read
+  pull-requests: write # required so the Action can post its receipt comment
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: nowshad7/agent-proof@v0.1.0
+        with:
+          version: v0.1.0 # a release tag downloads a prebuilt binary
+```
+
+Key inputs:
+
+| Input | Default | Meaning |
+| --- | --- | --- |
+| `version` | `main` | A release tag (e.g. `v0.1.0`) downloads a prebuilt binary; a branch or SHA builds from source. |
+| `config` | — | Apply a separately reviewed policy (for example from a protected base). |
+| `comment-on-pr` | `true` | Post/update the receipt comment on `pull_request` events. |
+| `commit`, `repo`, `out` | `HEAD`, `.`, `.agent-proof` | As for the CLI. |
+
+Outputs `status` and `receipt` are available for later steps. The Action still
+fails the job with the CLI's exit code, so it gates the PR.
+
+::: warning
+The Action is a developer preview. It runs the target repository's checks with
+the job's privileges — keep the trust notes above in mind, and do not run it
+under `pull_request_target` with secrets.
+:::

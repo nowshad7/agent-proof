@@ -3,7 +3,7 @@
 ```sh
 agentproof version
 agentproof verify [flags]
-agentproof report --input <receipt.json> [--format json|md|html]
+agentproof report --input <receipt.json> [--format json|md|html|gh]
 ```
 
 ## `version`
@@ -35,7 +35,13 @@ Re-renders a stored receipt in another format. It does not run checks.
 | Flag | Default | Meaning |
 | --- | --- | --- |
 | `--input <path>` | — | **Required.** Path to a `receipt.json`. |
-| `--format <fmt>` | `md` | `json`, `md` (or `markdown`), or `html`. |
+| `--format <fmt>` | `md` | `json`, `md` (or `markdown`), `html`, or `gh`. |
+
+The `gh` format renders a GitHub-flavored Markdown body for a pull-request
+comment: a status header, a requirements table, a collapsible checks section,
+and a leading `<!-- agentproof-receipt -->` marker so the comment can be updated
+in place rather than duplicated. The bundled [GitHub Action](/guide/ci) posts it
+for you.
 
 Output is written to standard output.
 

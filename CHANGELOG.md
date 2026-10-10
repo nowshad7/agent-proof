@@ -7,6 +7,22 @@ reaches a stable release.
 
 ## [Unreleased]
 
+### Added
+
+- `agentproof report --format gh` renders a GitHub-flavored Markdown body for a
+  pull-request comment, with a sticky `<!-- agentproof-receipt -->` marker so it
+  can be updated in place.
+- The GitHub Action now posts the receipt as a single sticky pull-request
+  comment (created once, updated on every run, including on failure), gated by a
+  `comment-on-pr` input and the caller's `pull-requests: write` permission.
+- The GitHub Action downloads a prebuilt binary when `version` is a release tag,
+  falling back to building from source for a branch or SHA.
+- GoReleaser configuration and a tag-triggered release workflow produce
+  cross-platform binaries (linux/macOS/windows, amd64/arm64) and a
+  `checksums.txt`, with the build version injected via ldflags.
+- CI validates the GoReleaser config (`goreleaser check`) and exercises the
+  Action end to end against this repository on pull requests.
+
 ## [0.1.0] — 2026-10-10 (developer preview)
 
 The first public developer preview.
