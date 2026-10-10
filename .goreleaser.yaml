@@ -30,12 +30,10 @@ archives:
     # Produces e.g. agentproof_0.1.0_linux_amd64.tar.gz — the name the
     # GitHub Action downloads.
     name_template: "agentproof_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
-    formats:
-      - tar.gz
+    format: tar.gz
     format_overrides:
       - goos: windows
-        formats:
-          - zip
+        format: zip
     files:
       - README.md
       - LICENSE

@@ -114,5 +114,5 @@ jobs:
         uses: goreleaser/goreleaser-action@v6
         with:
           distribution: goreleaser
-          version: '~> v2'
+          version: 'v2.4.4'
           args: check
