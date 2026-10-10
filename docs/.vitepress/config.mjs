@@ -88,6 +88,7 @@ export default defineConfig({
           { text: 'Agent workflows', link: '/guide/agents' },
           { text: 'GitHub Actions / CI', link: '/guide/ci' },
           { text: 'Reports', link: '/guide/reports' },
+          { text: 'Verification badge', link: '/guide/badge' },
         ],
       },
       {

@@ -19,7 +19,7 @@ const usage = `agentproof — reproducible verification for agent-written change
 Usage:
   agentproof version
   agentproof verify [flags]
-  agentproof report --input <receipt.json> [--format json|md|html|gh]
+  agentproof report --input <receipt.json> [--format json|md|html|gh|badge]
 
 verify flags:
   --trust-local        Required. Acknowledge that checks run locally with your
@@ -119,10 +119,15 @@ func writeReceipts(dir string, r *proof.Receipt) error {
 	if err != nil {
 		return err
 	}
+	badgeBytes, err := proof.RenderBadge(r)
+	if err != nil {
+		return err
+	}
 	files := map[string][]byte{
 		"receipt.json": jsonBytes,
 		"receipt.md":   proof.RenderMarkdown(r),
 		"receipt.html": proof.RenderHTML(r),
+		"badge.json":   badgeBytes,
 	}
 	for name, data := range files {
 		if err := os.WriteFile(filepath.Join(dir, name), data, 0o644); err != nil {
@@ -145,7 +150,7 @@ func runReport(args []string) int {
 	fs := flag.NewFlagSet("report", flag.ContinueOnError)
 	fs.SetOutput(os.Stderr)
 	input := fs.String("input", "", "receipt.json path")
-	format := fs.String("format", "md", "json|md|html|gh")
+	format := fs.String("format", "md", "json|md|html|gh|badge")
 	if err := fs.Parse(args); err != nil {
 		return 2
 	}
@@ -177,6 +182,13 @@ func runReport(args []string) int {
 		os.Stdout.Write(proof.RenderHTML(receipt))
 	case "gh", "comment":
 		os.Stdout.Write(proof.RenderGitHubComment(receipt))
+	case "badge":
+		b, err := proof.RenderBadge(receipt)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error: %v\n", err)
+			return 2
+		}
+		os.Stdout.Write(b)
 	default:
 		fmt.Fprintf(os.Stderr, "error: unknown format %q\n", *format)
 		return 2

@@ -101,8 +101,14 @@ Key inputs:
 | `comment-on-pr` | `true` | Post/update the receipt comment on `pull_request` events. |
 | `commit`, `repo`, `out` | `HEAD`, `.`, `.agent-proof` | As for the CLI. |
 
-Outputs `status` and `receipt` are available for later steps. The Action still
-fails the job with the CLI's exit code, so it gates the PR.
+Outputs `status`, `receipt` and `badge` are available for later steps. The
+Action still fails the job with the CLI's exit code, so it gates the PR.
+
+## A live badge
+
+Every run also writes a Shields.io endpoint `badge.json` (exposed as the
+`badge` output). Publish it and point a badge at it to show a live, fail-closed
+verification badge in your README — see [Verification badge](/guide/badge).
 
 ::: warning
 The Action is a developer preview. It runs the target repository's checks with

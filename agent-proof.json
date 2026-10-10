@@ -32,6 +32,12 @@
       "description": "Evidence is escaped in the HTML receipt",
       "check": "unit",
       "test": "github.com/nowshad7/agent-proof/internal/proof::TestRenderHTMLEscapes"
+    },
+    {
+      "id": "badge-fails-closed",
+      "description": "No status other than an explicit PASS can produce a green verification badge",
+      "check": "unit",
+      "test": "github.com/nowshad7/agent-proof/internal/proof::TestRenderBadgeFailsClosed"
     }
   ]
 }

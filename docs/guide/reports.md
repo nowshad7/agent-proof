@@ -1,13 +1,14 @@
 # Reports
 
-Every verification writes three receipts to the output directory (default
-`.agent-proof/`). All three describe the same result.
+Every verification writes its receipts to the output directory (default
+`.agent-proof/`). They all describe the same result.
 
 | File | Purpose |
 | --- | --- |
 | `receipt.json` | Full structured result for automation and archival. |
 | `receipt.md` | Compact requirement summary for code review. |
 | `receipt.html` | Self-contained, portable page for sharing. |
+| `badge.json` | Shields.io endpoint for a live README [badge](/guide/badge). |
 
 ## Regenerating a view
 
@@ -42,6 +43,13 @@ details and per-test tables. It is safe to share:
 - All evidence (test names, captured output, diagnostics) is HTML-escaped.
 - A restrictive `Content-Security-Policy` is applied: no scripts, no external
   resources.
+
+## Badge
+
+A [Shields.io endpoint](https://shields.io/badges/endpoint-badge) JSON document
+for a live README badge. `verify` writes it to `badge.json` automatically, and
+`report --format badge` re-renders it from a stored receipt. It fails closed —
+only an explicit `PASS` is green. See [Verification badge](/guide/badge).
 
 ## Interpreting results
 

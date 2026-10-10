@@ -22,9 +22,16 @@ The first public developer preview.
   missing, incomplete, duplicate or malformed evidence.
 - Requirement aggregation across five states (`PASS`, `FAIL`, `UNVERIFIED`,
   `ERROR`, `SKIPPED`) with a fail-closed overall gate.
-- JSON, Markdown and self-contained, escaped HTML receipts.
+- JSON, Markdown, self-contained escaped HTML, GitHub pull-request comment
+  (`gh`) and Shields.io [badge](/guide/badge) receipt formats.
+- A live, fail-closed verification badge: `verify` writes `badge.json` and only
+  an explicit `PASS` is ever coloured green.
 - Stable CLI exit codes (`0` pass, `1` acceptance failure, `2` operational
   error) and a `report` subcommand to re-render stored receipts.
+- A composite GitHub Action that verifies a change, posts a sticky receipt
+  comment on pull requests, and downloads a prebuilt binary for release tags.
+- Cross-platform release binaries (linux/macOS/windows, amd64/arm64) via
+  GoReleaser.
 - Runnable Go and JUnit examples and an example runner script.
 - VitePress documentation.
 

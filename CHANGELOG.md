@@ -5,15 +5,24 @@ All notable changes to this project are documented here. The format is based on
 to follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html) once it
 reaches a stable release.
 
-## [Unreleased]
+## [0.1.0] — 2026-10-10 (developer preview)
+
+The first public developer preview.
 
 ### Added
 
+- `agentproof report --format badge` renders a Shields.io endpoint JSON for a
+  live README verification badge, and `verify` writes it to `badge.json` on
+  every run. The badge fails closed: only an explicit `PASS` is coloured green,
+  and an unknown or empty status reads `unknown`, never a pass. A new
+  `badge-fails-closed` self-verification requirement and the
+  [badge guide](docs/guide/badge.md) cover it; the Action exposes it as a
+  `badge` output.
 - `agentproof report --format gh` renders a GitHub-flavored Markdown body for a
   pull-request comment, with a sticky `<!-- agentproof-receipt -->` marker so it
   can be updated in place.
-- The GitHub Action now posts the receipt as a single sticky pull-request
-  comment (created once, updated on every run, including on failure), gated by a
+- The GitHub Action posts the receipt as a single sticky pull-request comment
+  (created once, updated on every run, including on failure), gated by a
   `comment-on-pr` input and the caller's `pull-requests: write` permission.
 - The GitHub Action downloads a prebuilt binary when `version` is a release tag,
   falling back to building from source for a branch or SHA.
@@ -22,13 +31,6 @@ reaches a stable release.
   `checksums.txt`, with the build version injected via ldflags.
 - CI validates the GoReleaser config (`goreleaser check`) and exercises the
   Action end to end against this repository on pull requests.
-
-## [0.1.0] — 2026-10-10 (developer preview)
-
-The first public developer preview.
-
-### Added
-
 - Strict `agent-proof.json` acceptance contract (version 1) with full validation
   of checks, requirements, parsers, timeouts and references; unknown fields and
   trailing content are rejected.
@@ -58,5 +60,4 @@ The first public developer preview.
 - Submodules and Git LFS hydration are not supported.
 - The bundled Action is early; validate it from a separate repository first.
 
-[Unreleased]: https://github.com/nowshad7/agent-proof/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/nowshad7/agent-proof/releases/tag/v0.1.0

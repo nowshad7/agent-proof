@@ -52,6 +52,12 @@ outputs:
   receipt:
     description: Path to the generated receipt.json.
     value: ${{ steps.verify.outputs.receipt }}
+  badge:
+    description: >-
+      Path to the generated Shields.io endpoint badge.json. Publish it (to
+      GitHub Pages, a gist or a build artifact) and point a Shields endpoint
+      badge at its URL for a live verification badge in your README.
+    value: ${{ steps.verify.outputs.badge }}
 
 runs:
   using: composite
@@ -120,6 +126,7 @@ runs:
         set -e
 
         receipt="${{ inputs.out }}/receipt.json"
+        badge="${{ inputs.out }}/badge.json"
         status="ERROR"
         if [ -f "$receipt" ]; then
           parsed="$(grep -o '"status": *"[A-Z]*"' "$receipt" | head -n1 | grep -oE '[A-Z]+' | head -n1)"
@@ -128,6 +135,7 @@ runs:
         {
           echo "status=$status"
           echo "receipt=$receipt"
+          echo "badge=$badge"
           echo "exitcode=$code"
         } >> "$GITHUB_OUTPUT"
 
