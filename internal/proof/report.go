@@ -130,6 +130,77 @@ func shortSHA(sha string) string {
 	return sha
 }
 
+// shieldsBadge is the Shields.io endpoint schema. A receipt is rendered to this
+// so a repository can display a live verification badge in its README:
+//
+//	![AgentProof](https://img.shields.io/endpoint?url=<published badge.json>)
+//
+// The badge reflects the receipt honestly and fails safe: any status other than
+// an explicit PASS is never coloured green, and an unrecognised or empty status
+// is reported as "unknown" in grey rather than being mistaken for a pass.
+type shieldsBadge struct {
+	SchemaVersion int    `json:"schemaVersion"`
+	Label         string `json:"label"`
+	Message       string `json:"message"`
+	Color         string `json:"color"`
+}
+
+// badgeColor maps a receipt status to a Shields colour. Only an explicit PASS
+// is green; everything else, including an unknown status, is a non-green colour
+// so a broken or tampered receipt can never masquerade as verified.
+func badgeColor(status string) string {
+	switch status {
+	case StatusPass:
+		return "brightgreen"
+	case StatusFail, StatusError:
+		return "red"
+	case StatusUnverified:
+		return "orange"
+	case StatusSkipped:
+		return "lightgrey"
+	default:
+		return "lightgrey"
+	}
+}
+
+// badgeMessage summarises a receipt for the badge. When requirements are
+// present it reports how many passed out of the total ("4/4 passed"); the
+// colour carries the pass/fail distinction. Without countable requirements it
+// falls back to the lowercased status, and an empty status becomes "unknown".
+func badgeMessage(r *Receipt) string {
+	total := len(r.Requirements)
+	if total == 0 || r.Status == StatusError {
+		if r.Status == "" {
+			return "unknown"
+		}
+		return strings.ToLower(r.Status)
+	}
+	passed := 0
+	for _, rr := range r.Requirements {
+		if rr.State == StatusPass {
+			passed++
+		}
+	}
+	return fmt.Sprintf("%d/%d passed", passed, total)
+}
+
+// RenderBadge returns a Shields.io endpoint JSON document describing the
+// receipt. Publish it (to GitHub Pages, a gist or a build artifact) and point a
+// Shields endpoint badge at its URL for a live verification badge.
+func RenderBadge(r *Receipt) ([]byte, error) {
+	b := shieldsBadge{
+		SchemaVersion: 1,
+		Label:         "agent-proof",
+		Message:       badgeMessage(r),
+		Color:         badgeColor(r.Status),
+	}
+	out, err := json.Marshal(b)
+	if err != nil {
+		return nil, err
+	}
+	return append(out, '\n'), nil
+}
+
 // RenderHTML returns a self-contained HTML report. All evidence is escaped and
 // a restrictive content-security policy is applied.
 func RenderHTML(r *Receipt) []byte {

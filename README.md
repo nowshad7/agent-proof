@@ -114,7 +114,21 @@ A minimal contract:
 
 AgentProof reads the contract from the **committed** snapshot, resolves the
 commit, runs the checks in an exported copy of that commit, and writes
-`receipt.json`, `receipt.md` and a self-contained `receipt.html`.
+`receipt.json`, `receipt.md`, a self-contained `receipt.html`, and a
+`badge.json`.
+
+### Show it with a badge
+
+Every run also writes a [Shields.io endpoint](https://shields.io/badges/endpoint-badge)
+`badge.json`. Publish it and point a badge at it for a live, **fail-closed**
+verification badge — only an explicit `PASS` is ever green:
+
+```md
+[![AgentProof](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/OWNER/REPO/badges/badge.json)](https://github.com/OWNER/REPO/actions)
+```
+
+See the [badge guide](https://nowshad7.github.io/agent-proof/guide/badge) for
+the one-job workflow that publishes it.
 
 ## Supported adapters
 

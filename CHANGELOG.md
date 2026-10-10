@@ -9,6 +9,13 @@ reaches a stable release.
 
 ### Added
 
+- `agentproof report --format badge` renders a Shields.io endpoint JSON for a
+  live README verification badge, and `verify` writes it to `badge.json` on
+  every run. The badge fails closed: only an explicit `PASS` is coloured green,
+  and an unknown or empty status reads `unknown`, never a pass. A new
+  `badge-fails-closed` self-verification requirement and the
+  [badge guide](docs/guide/badge.md) cover it; the Action exposes it as a
+  `badge` output.
 - `agentproof report --format gh` renders a GitHub-flavored Markdown body for a
   pull-request comment, with a sticky `<!-- agentproof-receipt -->` marker so it
   can be updated in place.

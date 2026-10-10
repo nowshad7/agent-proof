@@ -3,7 +3,7 @@
 ```sh
 agentproof version
 agentproof verify [flags]
-agentproof report --input <receipt.json> [--format json|md|html|gh]
+agentproof report --input <receipt.json> [--format json|md|html|gh|badge]
 ```
 
 ## `version`
@@ -35,13 +35,18 @@ Re-renders a stored receipt in another format. It does not run checks.
 | Flag | Default | Meaning |
 | --- | --- | --- |
 | `--input <path>` | — | **Required.** Path to a `receipt.json`. |
-| `--format <fmt>` | `md` | `json`, `md` (or `markdown`), `html`, or `gh`. |
+| `--format <fmt>` | `md` | `json`, `md` (or `markdown`), `html`, `gh`, or `badge`. |
 
 The `gh` format renders a GitHub-flavored Markdown body for a pull-request
 comment: a status header, a requirements table, a collapsible checks section,
 and a leading `<!-- agentproof-receipt -->` marker so the comment can be updated
 in place rather than duplicated. The bundled [GitHub Action](/guide/ci) posts it
 for you.
+
+The `badge` format renders a [Shields.io endpoint](https://shields.io/badges/endpoint-badge)
+JSON document for a live verification [badge](/guide/badge). Only an explicit
+`PASS` is coloured green; every other status, including an unknown one, is a
+non-green colour, so a broken or tampered receipt can never show as verified.
 
 Output is written to standard output.
 
